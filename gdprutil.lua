@@ -84,11 +84,13 @@ M.isEUCountry = function(country)
 end
 
 
---- anonymizes an ip address by stripping the lower-order octet(s)
+--- anonymizes an ip address by replacing the lower-order octet(s) with innocuous characters
 -- @param ip String the IPv4 address to be anonymized
 -- @param noctets Number Optional the number of lower-order octets to strip, valid range 1 - 2, default 1
 -- @param char String a single character string to be used as replacement, default "x"
 -- @return String the anonymized ip address, with lower-order octet numbers replaced with the replacement char
+-- @usage technically this is a **replacement** method rather than a **stripping** method.
+--   however, using a blank ("") replacement char will function as a strip method.
 -- @usage this function will **attempt** to provide a "useful" string reponse even if an invalid input ip is given,
 --   but results cannot be guaranteed, so try to pass only valid ip address strings
 --
@@ -103,7 +105,8 @@ M.anonymizeIP = function(ip,noctets,char)
 	noctets = math.max(1, math.min(2, noctets))
 	if (type(char)~="string") then char = "x" end
 	if (#char > 1) then char = string.sub(char,1,1) end
-	local i,j,a,b = string.find(ip, noctets==1 and "(%d+%.%d+%.%d+%.)(%d+)" or "(%d+%.%d+%.)(%d+%.%d+)")
+	local i,j,a,b = string.find(ip, noctets==1 and "(%d+%.%d+%.%d+)(%.%d+)" or "(%d+%.%d+)(%.%d+%.%d+)")
+	if (i and char=="") then b = string.gsub(b,"%.","") end
 	return i and a..string.gsub(i and b,"%d",char) or string.gsub("0.0.0.0", "%d", char)
 end
 

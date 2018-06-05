@@ -20,7 +20,9 @@ print("Manual getpref():", gdprutil.isEUCountry(system.getPreference("locale","c
 local function aip(ip)
 	print("IP:", ip)
 	print("", "AIP1:", gdprutil.anonymizeIP(ip))
-	print("", "AIP2:", gdprutil.anonymizeIP(ip,2,"X"))
+	print("", "AIP2:", gdprutil.anonymizeIP(ip,2,"0"))
+	print("", "AIP3:", gdprutil.anonymizeIP(ip,1,""))
+	print("", "AIP4:", gdprutil.anonymizeIP(ip,2,""))
 end
 -- good cases:
 aip("1.2.3.4")
