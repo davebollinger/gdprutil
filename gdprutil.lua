@@ -10,6 +10,7 @@ M.verbose = false
 -- https://en.wikipedia.org/wiki/Member_state_of_the_European_Union
 -- https://www.iso.org/iso-3166-country-codes.html
 -- https://en.wikipedia.org/wiki/ISO_3166-1
+-- https://en.wikipedia.org/wiki/General_Data_Protection_Regulation
 
 M.EUCountryCodeList = {
 	["AT"] = "Austria",
@@ -40,6 +41,10 @@ M.EUCountryCodeList = {
 	["ES"] = "Spain",
 	["SE"] = "Sweden",
 	["GB"] = "United Kingdom",
+	-- the following non-EU-but-EEA counties should probably also be included (formal adoption still pending as of this writing)
+	["IS"] = "Iceland",
+	["LI"] = "Liechtenstein",
+	["NO"] = "Norway",
 }
 
 ---
@@ -77,5 +82,30 @@ M.isEUCountry = function(country)
 	end
 	return result
 end
+
+
+--- anonymizes an ip address by stripping the lower-order octet(s)
+-- @param ip String the IPv4 address to be anonymized
+-- @param noctets Number Optional the number of lower-order octets to strip, valid range 1 - 2, default 1
+-- @param char String a single character string to be used as replacement, default "x"
+-- @return String the anonymized ip address, with lower-order octet numbers replaced with the replacement char
+-- @usage this function will **attempt** to provide a "useful" string reponse even if an invalid input ip is given,
+--   but results cannot be guaranteed, so try to pass only valid ip address strings
+--
+M.anonymizeIP = function(ip,noctets,char)
+	if (type(ip)~="string") then
+		if (M.verbose) then
+			print("gdprutil.anonymizeIP():  invalid ip address provided: " .. tostring(ip) .. " (" .. type(ip) .. ")")
+		end
+		ip = ""
+	end
+	if (type(noctets)~="number") then noctets = 1 end
+	noctets = math.max(1, math.min(2, noctets))
+	if (type(char)~="string") then char = "x" end
+	if (#char > 1) then char = string.sub(char,1,1) end
+	local i,j,a,b = string.find(ip, noctets==1 and "(%d+%.%d+%.%d+%.)(%d+)" or "(%d+%.%d+%.)(%d+%.%d+)")
+	return i and a..string.gsub(i and b,"%d",char) or string.gsub("0.0.0.0", "%d", char)
+end
+
 
 return M
